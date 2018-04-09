@@ -37,30 +37,32 @@
             // Instanciar ventana de informacion de marcadores
             var infoWindow = new google.maps.InfoWindow({map: map});
 
-            // Deteccion de ubicacion actual
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    var pos = { lat: position.coords.latitude,
-                                lng: position.coords.longitude };
-                    infoWindow.setPosition(pos);
-                    infoWindow.setContent('Mi ubicación.');
-                    map.setCenter(pos);
+            // Mostrar los marcadores al hacer clic en boton
+            function showListings () {
+                // Deteccion de ubicacion actual
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        var pos = { lat: position.coords.latitude,
+                                    lng: position.coords.longitude };
+                        infoWindow.setPosition(pos);
+                        infoWindow.setContent('Mi ubicación.');
+                        map.setCenter(pos);
 
-                    // Busqueda de cafeterias cercanas a nuestra ubicacion actual
-                    var service = new google.maps.places.PlacesService(map);
-                    service.nearbySearch({ location: pos,
-                                           radius: 500,
-                                           type: ['cafe'] }, 
-                                           callback);
-                },  
-                function() {
-                    handleLocationError(true, infoWindow, map.getCenter());
-                });
-            } else {
-                // Browser no soporta Geolocalizacion
-                handleLocationError(false, infoWindow, map.getCenter());
+                        // Busqueda de cafeterias cercanas a nuestra ubicacion actual
+                        var service = new google.maps.places.PlacesService(map);
+                        service.nearbySearch({ location: pos,
+                                               radius: 500,
+                                               type: ['cafe'] }, 
+                                               callback);
+                    },  
+                    function() {
+                        handleLocationError(true, infoWindow, map.getCenter());
+                    });
+                } else {
+                    // Browser no soporta Geolocalizacion
+                    handleLocationError(false, infoWindow, map.getCenter());
+                }
             }
-
             // Crear marcadores para las cafeterias cercanas
             function callback(results, status) {
                 if (status === google.maps.places.PlacesServiceStatus.OK) {
@@ -82,7 +84,9 @@
                     infoWindow.setContent(place.name);
                     infoWindow.open(map, this);
                 });
-            }   
+            }
+            // Deteccion de evento click
+            document.getElementById('show-listings').addEventListener('click', showListings); 
         }
 
         // Manejo de errores de localizacion
@@ -104,6 +108,6 @@
     ?>
     <h2>UN CAFÉ CERCA A TI</h2>
     <div id="map"></div>
-    <input type="button" value="Mi localización" class="mi-localizacion">
+    <input type="button" value="Mi localización" id="show-listings">
 </body>
 </html>
