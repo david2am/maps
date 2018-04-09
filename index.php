@@ -24,7 +24,7 @@
         }
         h3 {
             font-weight: bold;
-            color: black;
+            
         }
         th, td {
             text-align: center;
@@ -44,8 +44,8 @@
             outline: none;
             border: 0;
             font-size: x-large;
+            margin-right: 0.62em;
             padding: 0.3em;
-            margin: 1em 0.62em;
         }
         #localidad {
             margin-left: 3em;
