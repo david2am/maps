@@ -12,24 +12,49 @@
     <style>
         #map {
             width: 100%;
-            height: 400px;
+            height: 380px;
         }
         html, body {
             height: 100%;
             font-family: Helvetica, 'Nexa Bold';
         }
+        h2 {
+            text-align: center;
+            font-weight: bold;
+        }
         h3 {
             font-weight: bold;
-            text-align: center;
-        }
-        h4 {
-            font-weight: bold;
+            color: black;
         }
         th, td {
             text-align: center;
+            width: 7em;
+            font-weight: bold;
+            color: black;
+            font-size: medium;
         }
-        input {
+        #encabezado {
+            background-color: #cd3301;
+            color: black;
+        }
+        button {
             right: 40px;
+            background-color: #cd3301;
+            color: white;
+            outline: none;
+            border: 0;
+            font-size: x-large;
+            padding: 0.3em;
+            margin: 1em 0.62em;
+        }
+        #localidad {
+            margin-left: 3em;
+        }
+        table {
+            margin-left: 2em;
+        }
+        #presentacion_clima {
+            margin-left: 0.6em;
         }
     </style>
     
@@ -110,7 +135,7 @@
                                         d = data.weather.description;
                                         // Se crea la tabla informativa del clima
                                         $('#clima').html('<table>' +
-                                                            '<tr>' +
+                                                            '<tr id="encabezado">' +
                                                                 '<th>Temperatura</th>' +
                                                                 '<th>Humedad</th>' +
                                                                 '<th>Descripción</th>' +
@@ -127,9 +152,9 @@
                                     }
                                 });
                                 
-                                $('#localidad').html('<p>' + barrio_long_name + 
+                                $('#localidad').html('<h3>' + barrio_long_name + 
                                                      ', '  + city_long_name + 
-                                                     ', '  + country_long_name + '</p>');
+                                                     ', '  + country_long_name + '</h3>');
                                 map.setCenter(results[0].geometry.location);
                                 var marker = new google.maps.Marker({
                                     map: map,
@@ -202,18 +227,22 @@
         fclose($f);
     ?>
 
-    <h3>UN CAFÉ CERCA A TI</h3>
+    <h2>UN CAFÉ CERCA A TI</h2>
     
     <div class="container">
         <div id="map"></div>
-        <div class="row">
-            <input type="button" value="Mi localización" id="show-listings" class="pull-right">
-        </div>
+
         <div class="row">
             <div id="localidad"></div>
-            <h4>Clima:</h4>
+            <button id="show-listings" class="pull-right">Mi localización</button>
         </div>
+
+        <div class="row">
+            <h3 id="presentacion_clima">Clima:</h3>
+        </div>
+
         <div id="clima"></div>
+
     </div>
     
 
