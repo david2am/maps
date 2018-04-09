@@ -38,6 +38,9 @@
         var map;
         var infoWindow;
 
+        var city_long_name;
+        var country_long_name;
+
         function initMap() {
             var medellin = {lat: 6.25184, lng: -75.56359};
             geocoder = new google.maps.Geocoder();
@@ -74,7 +77,8 @@
                             if (status == 'OK') {
                                 var country_long_name = '';
                                 var city_long_name = '';
-                            
+                                
+                                // Extraer la localidad (ciudad-pais)
                                 results[0].address_components.map(address_component => {
                                     if (address_component.types[0] == 'country') {
                                         country_long_name = address_component.long_name;
@@ -83,7 +87,41 @@
                                     }
                                     
                                 });
-                                console.log([country_long_name, city_long_name]);
+
+                                // Servicio de OpenWeatherMap
+
+                                var key = $("#OWM_key").html();
+                                var values;
+                                var t;
+                                
+                                $.ajax({
+                                    type: "GET",
+                                    url: "http://api.openweathermap.org/data/2.5/weather?q="+ 
+                                        city_long_name +","+ country_long_name +" PR&APPID=" + key,
+                                    dataType: "json",
+                                    success: function (data) {
+                                        values = data.main;
+                                        t = values.temp - 273.15;
+                                        h = values.humidity;
+                                        d = data.weather.description;
+                                        $('#clima').html('<table>' +
+                                                            '<tr>' +
+                                                                '<th>Temperatura</th>' +
+                                                                '<th>Humedad</th>' +
+                                                                '<th>Descripción</th>' +
+                                                            '</tr>' +
+                                                            '<tr>' +
+                                                                '<td>' + Math.round(t) + '°C</td>' +
+                                                                '<td>' + h + '%</td>' +
+                                                                '<td>' + d + '</td>' +
+                                                            '</tr>' + 
+                                                            '</table>');
+                                    },
+                                    error: function (jqXHR, textStatus, errorThrown) {
+                                        alert(errorThrown);
+                                    }
+                                });
+                                
                                 $('#localidad').html('<p>' + city_long_name +', ' + country_long_name + '</p>');
                                 map.setCenter(results[0].geometry.location);
                                 var marker = new google.maps.Marker({
@@ -103,11 +141,11 @@
                     // Browser no soporta Geolocalizacion
                     handleLocationError(false, infoWindow, map.getCenter());
                 }
+
             }
             // Crear marcadores para las cafeterias cercanas
             function callback(results, status) {
                 if (status === google.maps.places.PlacesServiceStatus.OK) {
-                    console.log(results[0]);
                     for (var i = 0; i < results.length; i++) {
                         createMarker(results[i]);
                     }
@@ -139,42 +177,7 @@
                                 'Error: Su buscador no soporta geolocalización.');
         }
 
-        // Servicio de OpenWeatherMap
-
-        $(document).ready(function(){
-            
-            var key = $("#OWM_key").text();
-            var values;
-            var t;
-
-            $.ajax({
-                type: "GET",
-                url: "http://api.openweathermap.org/data/2.5/weather?q=Medellín,CO PR&APPID=" + key,
-                dataType: "json",
-                success: function (data) {
-                    values = data.main;
-                    t = values.temp - 273.15;
-                    h = values.humidity;
-                    d = data.weather.description;
-                    $('#clima').html('<table>' +
-                                        '<tr>' +
-                                            '<th>Temperatura</th>' +
-                                            '<th>Humedad</th>' +
-                                            '<th>Descripción</th>' +
-                                        '</tr>' +
-                                        '<tr>' +
-                                            '<td>' + Math.round(t) + '°C</td>' +
-                                            '<td>' + h + '%</td>' +
-                                            '<td>' + d + '</td>' +
-                                        '</tr>' + 
-                                        '</table>');
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    alert(errorThrown);
-                }
-            });
-
-        });
+       
         
     </script>
 </head>
