@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Librería JQuery -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <!-- Versión compilada y comprimida del CSS de Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <title>Coffe time</title>
@@ -11,7 +13,6 @@
         #map {
             width: 100%;
             height: 400px;
-            background-color: grey;
         }
         html, body {
             height: 100%;
@@ -22,6 +23,7 @@
             text-align: center;
         }
     </style>
+    <!-- Servicio de Geolocalización y Places -->
     <script>
 
         var map;
@@ -47,7 +49,7 @@
                         infoWindow.setPosition(pos);
                         infoWindow.setContent('Mi ubicación.');
                         map.setCenter(pos);
-
+                        console.log(position);
                         // Busqueda de cafeterias cercanas a nuestra ubicacion actual
                         var service = new google.maps.places.PlacesService(map);
                         service.nearbySearch({ location: pos,
@@ -93,9 +95,48 @@
         function handleLocationError(browserHasGeolocation, infoWindow, pos) {
             infoWindow.setPosition(pos);
             infoWindow.setContent(browserHasGeolocation ?
-                                'Error: The Geolocation service failed.' :
-                                'Error: Your browser doesn\'t support geolocation.');
+                                'Error: El servicio de Geolocalización falló.' :
+                                'Error: Su buscador no soporta geolocalización.');
         }
+    </script>
+
+    <style>
+        th, td {
+            text-align: center;
+        }
+    </style>
+     <!-- Servicio de OpenWeatherMap -->
+    <script>
+        var values;
+        var t;
+        
+        $.ajax({
+            type: "GET",
+            url: "http://api.openweathermap.org/data/2.5/weather?q=Medellín,CO PR&APPID=24c141d95153e5c76b8a53ccb5db9868",
+            dataType: "json",
+            success: function (data) {
+                values = data.main;
+                t = values.temp - 273.15;
+                h = values.humidity;
+                d = data.weather.description;
+                $('#clima').html('<table>' +
+                                    '<tr>' +
+                                        '<th>Temperatura</th>' +
+                                        '<th>Humedad</th>' +
+                                        '<th>Descripción</th>' +
+                                    '</tr>' +
+                                    '<tr>' +
+                                        '<td>' + t + '°C</td>' +
+                                        '<td>' + h + '%</td>' +
+                                        '<td>' + d + '</td>' +
+                                    '</tr>' + 
+                                    '</table>');
+                console.log(t);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert(errorThrown);
+            }
+        });
     </script>
 </head>
 <body>
@@ -109,5 +150,6 @@
     <h2>UN CAFÉ CERCA A TI</h2>
     <div id="map"></div>
     <input type="button" value="Mi localización" id="show-listings">
+    <div id="clima"></div>
 </body>
 </html>
