@@ -18,9 +18,18 @@
             height: 100%;
             font-family: Helvetica, 'Nexa Bold';
         }
-        h2 {
+        h3 {
             font-weight: bold;
             text-align: center;
+        }
+        h4 {
+            font-weight: bold;
+        }
+        th, td {
+            text-align: center;
+        }
+        input {
+            right: 40px;
         }
     </style>
     <!-- Servicio de Geolocalización y Places -->
@@ -31,6 +40,7 @@
 
         function initMap() {
             var medellin = {lat: 6.25184, lng: -75.56359};
+            geocoder = new google.maps.Geocoder();
 
             map = new google.maps.Map(document.getElementById('map'), {
                 center: medellin,
@@ -56,6 +66,35 @@
                                                radius: 500,
                                                type: ['cafe'] }, 
                                                callback);
+                        
+
+                        // Extraer las localidades ciudad-pais
+                        var latlng = new google.maps.LatLng(pos.lat, pos.lng);
+                        geocoder.geocode( { 'location': latlng}, function(results, status) {
+                            if (status == 'OK') {
+                                var country_long_name = '';
+                                var city_long_name = '';
+                            
+                                results[0].address_components.map(address_component => {
+                                    if (address_component.types[0] == 'country') {
+                                        country_long_name = address_component.long_name;
+                                    } else if (address_component.types[0] == 'administrative_area_level_2') {
+                                        city_long_name = address_component.long_name;    
+                                    }
+                                    
+                                });
+                                console.log([country_long_name, city_long_name]);
+                                $('#localidad').html('<p>' + city_long_name +', ' + country_long_name + '</p>');
+                                map.setCenter(results[0].geometry.location);
+                                var marker = new google.maps.Marker({
+                                    map: map,
+                                    position: results[0].geometry.location
+                                });
+                            } else {
+                                alert('Geocode was not successful for the following reason: ' + status);
+                            }
+                        
+                        });
                     },  
                     function() {
                         handleLocationError(true, infoWindow, map.getCenter());
@@ -68,6 +107,7 @@
             // Crear marcadores para las cafeterias cercanas
             function callback(results, status) {
                 if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    console.log(results[0]);
                     for (var i = 0; i < results.length; i++) {
                         createMarker(results[i]);
                     }
@@ -98,20 +138,12 @@
                                 'Error: El servicio de Geolocalización falló.' :
                                 'Error: Su buscador no soporta geolocalización.');
         }
-    </script>
 
-    <style>
-        th, td {
-            text-align: center;
-        }
-    </style>
-     <!-- Servicio de OpenWeatherMap -->
+        // Servicio de OpenWeatherMap
 
-    <script>
         $(document).ready(function(){
             
             var key = $("#OWM_key").text();
-
             var values;
             var t;
 
@@ -148,20 +180,32 @@
 </head>
 <body>
     <?php 
-        // Insercion de la API key
+        // Lectura de las credenciales o API keys
         $f = fopen('credenciales.txt', 'r');
         $keys = [];
         while(!feof($f)) { 
             $keys[] = fgets($f);            
         }
+        // Insercion de credenciales para su uso
         echo '<script src="https://maps.googleapis.com/maps/api/js?key=' . $keys[0] .'&libraries=places&callback=initMap" async defer></script>';
         echo '<p id="OWM_key" hidden>' . $keys[1] . '</p>';
         fclose($f);
     ?>
-    <h2>UN CAFÉ CERCA A TI</h2>
-    <div id="map"></div>
-    <input type="button" value="Mi localización" id="show-listings">
-    <div id="clima"></div>
+
+    <h3>UN CAFÉ CERCA A TI</h3>
+    
+    <div class="container">
+        <div id="map"></div>
+        <div class="row">
+            <input type="button" value="Mi localización" id="show-listings" class="pull-right">
+        </div>
+        <div class="row">
+            <div id="localidad"></div>
+            <h4>Clima:</h4>
+        </div>
+        <div id="clima"></div>
+    </div>
+    
 
 </body>
 </html>
