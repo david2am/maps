@@ -32,12 +32,14 @@
             right: 40px;
         }
     </style>
-    <!-- Servicio de Geolocalización y Places -->
+    
     <script>
+        // <<Servicio de Geolocallizacion y Places>>
 
         var map;
         var infoWindow;
-
+        
+        var barrio_long_name;
         var city_long_name;
         var country_long_name;
 
@@ -70,7 +72,6 @@
                                                type: ['cafe'] }, 
                                                callback);
                         
-
                         // Extraer las localidades ciudad-pais
                         var latlng = new google.maps.LatLng(pos.lat, pos.lng);
                         geocoder.geocode( { 'location': latlng}, function(results, status) {
@@ -79,21 +80,24 @@
                                 var city_long_name = '';
                                 
                                 // Extraer la localidad (ciudad-pais)
+                                console.log(results[0].address_components);
                                 results[0].address_components.map(address_component => {
                                     if (address_component.types[0] == 'country') {
                                         country_long_name = address_component.long_name;
                                     } else if (address_component.types[0] == 'administrative_area_level_2') {
                                         city_long_name = address_component.long_name;    
+                                    } else if (address_component.types[0] == 'neighborhood') {
+                                        barrio_long_name = address_component.long_name;
                                     }
-                                    
                                 });
 
-                                // Servicio de OpenWeatherMap
-
+                                // <<Servicio de OpenWeatherMap>>
+                                
+                                // Extraccion de la clave
                                 var key = $("#OWM_key").html();
                                 var values;
                                 var t;
-                                
+                                // Consulta al servicio
                                 $.ajax({
                                     type: "GET",
                                     url: "http://api.openweathermap.org/data/2.5/weather?q="+ 
@@ -104,6 +108,7 @@
                                         t = values.temp - 273.15;
                                         h = values.humidity;
                                         d = data.weather.description;
+                                        // Se crea la tabla informativa del clima
                                         $('#clima').html('<table>' +
                                                             '<tr>' +
                                                                 '<th>Temperatura</th>' +
@@ -122,7 +127,9 @@
                                     }
                                 });
                                 
-                                $('#localidad').html('<p>' + city_long_name +', ' + country_long_name + '</p>');
+                                $('#localidad').html('<p>' + barrio_long_name + 
+                                                     ', '  + city_long_name + 
+                                                     ', '  + country_long_name + '</p>');
                                 map.setCenter(results[0].geometry.location);
                                 var marker = new google.maps.Marker({
                                     map: map,
