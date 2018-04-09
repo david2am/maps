@@ -25,7 +25,7 @@
     <script>
 
         var map;
-        var infowindow;
+        var infoWindow;
 
         function initMap() {
             var medellin = {lat: 6.25184, lng: -75.56359};
@@ -34,37 +34,65 @@
                 center: medellin,
                 zoom: 15
             });
+            // Instanciar ventana de informacion de marcadores
+            var infoWindow = new google.maps.InfoWindow({map: map});
 
-            infowindow = new google.maps.InfoWindow();
-            var service = new google.maps.places.PlacesService(map);
-            service.nearbySearch({
-                location: medellin,
-                radius: 500,
-                type: ['cafe']
-            }, callback);
-        }
+            // Deteccion de ubicacion actual
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var pos = { lat: position.coords.latitude,
+                                lng: position.coords.longitude };
+                    infoWindow.setPosition(pos);
+                    infoWindow.setContent('Mi ubicación.');
+                    map.setCenter(pos);
 
-        function callback(results, status) {
-            if (status === google.maps.places.PlacesServiceStatus.OK) {
-                for (var i = 0; i < results.length; i++) {
-                    createMarker(results[i]);
+                    // Busqueda de cafeterias cercanas a nuestra ubicacion actual
+                    var service = new google.maps.places.PlacesService(map);
+                    service.nearbySearch({ location: pos,
+                                           radius: 500,
+                                           type: ['cafe'] }, 
+                                           callback);
+                },  
+                function() {
+                    handleLocationError(true, infoWindow, map.getCenter());
+                });
+            } else {
+                // Browser no soporta Geolocalizacion
+                handleLocationError(false, infoWindow, map.getCenter());
+            }
+
+            // Crear marcadores para las cafeterias cercanas
+            function callback(results, status) {
+                if (status === google.maps.places.PlacesServiceStatus.OK) {
+                    for (var i = 0; i < results.length; i++) {
+                        createMarker(results[i]);
+                    }
                 }
             }
+
+            function createMarker(place) {
+                var placeLoc = place.geometry.location;
+                var marker = new google.maps.Marker({ 
+                    map: map,
+                    position: place.geometry.location,
+                    animation: google.maps.Animation.DROP,
+                });
+                // Mostrar nombre de la cafeteria
+                google.maps.event.addListener(marker, 'click', function() {
+                    infoWindow.setContent(place.name);
+                    infoWindow.open(map, this);
+                });
+            }   
         }
 
-        function createMarker(place) {
-            var placeLoc = place.geometry.location;
-            var marker = new google.maps.Marker({
-                map: map,
-                position: place.geometry.location
-            });
-
-            google.maps.event.addListener(marker, 'click', function() {
-                infowindow.setContent(place.name);
-                infowindow.open(map, this);
-            });
+        // Manejo de errores de localizacion
+        function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+            infoWindow.setPosition(pos);
+            infoWindow.setContent(browserHasGeolocation ?
+                                'Error: The Geolocation service failed.' :
+                                'Error: Your browser doesn\'t support geolocation.');
         }
-        </script>
+    </script>
 </head>
 <body>
     <?php 
@@ -76,5 +104,6 @@
     ?>
     <h2>UN CAFÉ CERCA A TI</h2>
     <div id="map"></div>
+    <input type="button" value="Mi localización" class="mi-localizacion">
 </body>
 </html>
