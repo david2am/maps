@@ -49,7 +49,7 @@
                         infoWindow.setPosition(pos);
                         infoWindow.setContent('Mi ubicación.');
                         map.setCenter(pos);
-                        console.log(position);
+
                         // Busqueda de cafeterias cercanas a nuestra ubicacion actual
                         var service = new google.maps.places.PlacesService(map);
                         service.nearbySearch({ location: pos,
@@ -106,50 +106,62 @@
         }
     </style>
      <!-- Servicio de OpenWeatherMap -->
+
     <script>
-        var values;
-        var t;
-        
-        $.ajax({
-            type: "GET",
-            url: "http://api.openweathermap.org/data/2.5/weather?q=Medellín,CO PR&APPID=24c141d95153e5c76b8a53ccb5db9868",
-            dataType: "json",
-            success: function (data) {
-                values = data.main;
-                t = values.temp - 273.15;
-                h = values.humidity;
-                d = data.weather.description;
-                $('#clima').html('<table>' +
-                                    '<tr>' +
-                                        '<th>Temperatura</th>' +
-                                        '<th>Humedad</th>' +
-                                        '<th>Descripción</th>' +
-                                    '</tr>' +
-                                    '<tr>' +
-                                        '<td>' + t + '°C</td>' +
-                                        '<td>' + h + '%</td>' +
-                                        '<td>' + d + '</td>' +
-                                    '</tr>' + 
-                                    '</table>');
-                console.log(t);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                alert(errorThrown);
-            }
+        $(document).ready(function(){
+            
+            var key = $("#OWM_key").text();
+
+            var values;
+            var t;
+
+            $.ajax({
+                type: "GET",
+                url: "http://api.openweathermap.org/data/2.5/weather?q=Medellín,CO PR&APPID=" + key,
+                dataType: "json",
+                success: function (data) {
+                    values = data.main;
+                    t = values.temp - 273.15;
+                    h = values.humidity;
+                    d = data.weather.description;
+                    $('#clima').html('<table>' +
+                                        '<tr>' +
+                                            '<th>Temperatura</th>' +
+                                            '<th>Humedad</th>' +
+                                            '<th>Descripción</th>' +
+                                        '</tr>' +
+                                        '<tr>' +
+                                            '<td>' + Math.round(t) + '°C</td>' +
+                                            '<td>' + h + '%</td>' +
+                                            '<td>' + d + '</td>' +
+                                        '</tr>' + 
+                                        '</table>');
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert(errorThrown);
+                }
+            });
+
         });
+        
     </script>
 </head>
 <body>
     <?php 
         // Insercion de la API key
         $f = fopen('credenciales.txt', 'r');
-        $key = fgets($f);
-        echo '<script src="https://maps.googleapis.com/maps/api/js?key=' . $key .'&libraries=places&callback=initMap" async defer></script>';
+        $keys = [];
+        while(!feof($f)) { 
+            $keys[] = fgets($f);            
+        }
+        echo '<script src="https://maps.googleapis.com/maps/api/js?key=' . $keys[0] .'&libraries=places&callback=initMap" async defer></script>';
+        echo '<p id="OWM_key" hidden>' . $keys[1] . '</p>';
         fclose($f);
     ?>
     <h2>UN CAFÉ CERCA A TI</h2>
     <div id="map"></div>
     <input type="button" value="Mi localización" id="show-listings">
     <div id="clima"></div>
+
 </body>
 </html>
